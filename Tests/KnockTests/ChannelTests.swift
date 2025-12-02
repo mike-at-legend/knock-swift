@@ -21,9 +21,9 @@ final class ChannelTests: XCTestCase {
 
     func testFilterTokensOut_RemovesMatchingTokens() {
         let devices: [Knock.Device] = [
-            Knock.Device(token: "a", locale: "en_US", timezone: "UTC"),
-            Knock.Device(token: "b", locale: "en_US", timezone: "UTC"),
-            Knock.Device(token: "c", locale: "en_US", timezone: "UTC"),
+            Knock.Device(token: "a", locale: "en-US", timezone: "UTC"),
+            Knock.Device(token: "b", locale: "en-US", timezone: "UTC"),
+            Knock.Device(token: "c", locale: "en-US", timezone: "UTC"),
         ]
         let result = channelModule.filterTokensOutFromDevices(
             devices: devices, targetTokens: ["a", "b"])
@@ -33,7 +33,7 @@ final class ChannelTests: XCTestCase {
 
     func testFilterTokensOut_LeavesUnmatchedTokens() {
         let devices: [Knock.Device] = [
-            Knock.Device(token: "x", locale: "en_US", timezone: "UTC")
+            Knock.Device(token: "x", locale: "en-US", timezone: "UTC")
         ]
         let result = channelModule.filterTokensOutFromDevices(devices: devices, targetTokens: ["y"])
         XCTAssertEqual(result.count, 1)
@@ -49,7 +49,7 @@ final class ChannelTests: XCTestCase {
 
     func testAddToken_AddsNewToken() {
         let devices: [Knock.Device] = [
-            Knock.Device(token: "a", locale: "en_US", timezone: "UTC")
+            Knock.Device(token: "a", locale: "en-US", timezone: "UTC")
         ]
         let result = channelModule.addTokenToDevices(devices: devices, newToken: "b")
         XCTAssertEqual(result.count, 2)
@@ -59,7 +59,7 @@ final class ChannelTests: XCTestCase {
 
     func testAddToken_DoesNotAddDuplicateToken() {
         let devices: [Knock.Device] = [
-            Knock.Device(token: "a", locale: "en_US", timezone: "UTC")
+            Knock.Device(token: "a", locale: "en-US", timezone: "UTC")
         ]
         let result = channelModule.addTokenToDevices(devices: devices, newToken: "a")
         XCTAssertEqual(result.count, 1)
@@ -68,7 +68,7 @@ final class ChannelTests: XCTestCase {
 
     func testAddToken_PreservesExistingDevices() {
         let devices: [Knock.Device] = [
-            Knock.Device(token: "a", locale: "en_US", timezone: "UTC")
+            Knock.Device(token: "a", locale: "en-US", timezone: "UTC")
         ]
         let result = channelModule.addTokenToDevices(devices: devices, newToken: "b")
         let tokens = result.map { $0.token }
@@ -80,5 +80,10 @@ final class ChannelTests: XCTestCase {
         XCTAssertEqual(device.token, "abc123")
         XCTAssertNotNil(device.locale)
         XCTAssertNotNil(device.timezone)
+    }
+
+    func testBuildDeviceObject_LocaleUsesDashDelimiter() {
+        let device = channelModule.buildDeviceObject(token: "abc123")
+        XCTAssertFalse(device.locale?.contains("_") ?? false, "Locale should use dash delimiter, not underscore")
     }
 }
