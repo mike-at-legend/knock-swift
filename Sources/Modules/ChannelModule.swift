@@ -194,18 +194,11 @@ internal class ChannelModule {
             return []
         }
 
-        // AnyCodable decodes arrays as [[String: Any]], not [Knock.Device]
-        guard let deviceDicts = devicesValue as? [[String: Any]] else {
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: devicesValue)
+            return try JSONDecoder().decode([Knock.Device].self, from: jsonData)
+        } catch {
             return []
-        }
-
-        return deviceDicts.compactMap { dict -> Knock.Device? in
-            guard let token = dict["token"] as? String else {
-                return nil
-            }
-            let locale = dict["locale"] as? String
-            let timezone = dict["timezone"] as? String
-            return Knock.Device(token: token, locale: locale, timezone: timezone)
         }
     }
 
