@@ -185,7 +185,7 @@ internal class ChannelModule {
     internal func buildDeviceObject(token: String) -> Knock.Device {
         return Knock.Device(
             token: token,
-            locale: Locale.current.identifier,
+            locale: Locale.current.identifier.replacingOccurrences(of: "_", with: "-"),
             timezone: TimeZone.current.identifier
         )
     }
