@@ -106,10 +106,17 @@ internal class FeedModule {
     }
     
     // Todo: Make AsyncStream method for this
-    func on(eventName: String, completionHandler: @escaping ((Message) -> Void)) {
+    func on(eventName: String, completionHandler: @escaping @Sendable ((Message) -> Void)) {
         if let channel = feedChannel {
             channel.delegateOn(eventName, to: self) { (self, message) in
-                completionHandler(message)
+                // The Phoenix socket fires this callback from a background thread,
+                // but FeedManager is @MainActor, so callers registering via
+                // FeedManager.on() will have closures that inherit @MainActor
+                // isolation. Dispatch to main so the callback honours that contract
+                // and doesn't crash on dispatch_assert_queue.
+                DispatchQueue.main.async {
+                    completionHandler(message)
+                }
             }
         }
         else {
